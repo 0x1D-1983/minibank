@@ -34,6 +34,13 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 PYTHONPATH=src python3 src/main.py
 ```
 
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+PYTHONPATH=src python3 -m pytest tests/ -v
+```
+
 ## Requirements
 
 - Python 3.10+ (uses `|` for union types in type hints).
