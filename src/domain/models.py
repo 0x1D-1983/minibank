@@ -2,18 +2,11 @@ from abc import ABC, abstractmethod
 import threading
 from typing import Optional
 
-class InsufficientFundsError(Exception):
-    pass
-
-class AccountNotFoundError(Exception):
-    pass
-
-class InvalidAmountError(Exception):
-    """Raised when an amount is not valid (e.g. non-positive)."""
-    pass
-
-class OverdraftError(Exception):
-    pass
+from domain.exceptions import (
+    InsufficientFundsError,
+    InvalidAmountError,
+    OverdraftError,
+)
 
 class Account(ABC):
     owner: str
@@ -95,7 +88,6 @@ class CurrentAccount(Account):
             else:
                 raise OverdraftError("Overdraft limit exceeded")
         
-
 class Bank:
     accounts: list[Account]
 
@@ -124,29 +116,5 @@ class Bank:
         return sum(a.balance for a in self.accounts)
     
     def get_accounts_by_owner(self, owner: str) -> list[Account]:
-        """
-            Gets account by owner name
-        """
-
+        """Returns all accounts owned by the given owner."""
         return [a for a in self.accounts if a.owner == owner]
-    
-    def transfer(self, from_account_number: int, to_account_number: int, amount: float) -> None:
-        """
-            Transfers funds from a source account to a destination account
-        """
-
-        from_account = self.find_account(from_account_number)
-        if from_account is None:
-            raise AccountNotFoundError("Source account doesn't exist")
-        
-        to_account = self.find_account(to_account_number)
-        if to_account is None:
-            raise AccountNotFoundError("Destination account doesn't exist")
-        
-        # Always acquire locks in account_number order — prevents deadlock
-        first, second = sorted([from_account, to_account], key=lambda a: a.account_number)
-
-        with first._lock:
-            with second._lock:
-                from_account.withdraw(amount) # if this fails it throws an exception so it won't continue to destination account
-                to_account.deposit(amount)
