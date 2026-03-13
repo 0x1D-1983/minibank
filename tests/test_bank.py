@@ -1,13 +1,13 @@
 """Tests for Bank service."""
 
 from domain.models import CurrentAccount, SavingsAccount
-from repositories.in_memory import InMemoryBankRepository
+from repositories.in_memory import InMemoryAccountRepository
 from services.bank import Bank as BankService
 
 
 class TestBank:
     def test_add_and_find_account(self) -> None:
-        repo = InMemoryBankRepository()
+        repo = InMemoryAccountRepository()
         bank = BankService(repo)
         acc = SavingsAccount("Alice", 1, interest_rate=0.02)
         bank.add_account(acc)
@@ -15,7 +15,7 @@ class TestBank:
         assert bank.find_account(999) is None
 
     def test_total_deposits(self) -> None:
-        repo = InMemoryBankRepository()
+        repo = InMemoryAccountRepository()
         bank = BankService(repo)
         bank.add_account(SavingsAccount("A", 1, 0.02))
         bank.add_account(CurrentAccount("B", 2, 100))
@@ -24,7 +24,7 @@ class TestBank:
         assert bank.total_deposits() == 80
 
     def test_get_accounts_by_owner(self) -> None:
-        repo = InMemoryBankRepository()
+        repo = InMemoryAccountRepository()
         bank = BankService(repo)
         bank.add_account(SavingsAccount("Alice", 1, 0.02))
         bank.add_account(CurrentAccount("Alice", 2, 100))

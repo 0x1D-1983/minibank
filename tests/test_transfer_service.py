@@ -3,8 +3,6 @@
 import pytest
 
 from domain.exceptions import AccountNotFoundError, InsufficientFundsError
-from domain.models import CurrentAccount, SavingsAccount
-from repositories.in_memory import InMemoryBankRepository
 from services.transfer_service import TransferService
 from services.bank import Bank as BankService
 

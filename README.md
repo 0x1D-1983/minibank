@@ -12,7 +12,7 @@ src/
 │   └── logger.py      # AuditLogger, LogRecord
 ├── repositories/
 │   ├── base.py        # AccountRepository protocol
-│   └── in_memory.py   # InMemoryBankRepository
+│   └── in_memory.py   # InMemoryAccountRepository
 ├── services/
 │   ├── bank.py        # Bank (add_account, find_account, total_deposits, get_accounts_by_owner)
 │   └── transfer_service.py  # TransferService (orchestration + locking)

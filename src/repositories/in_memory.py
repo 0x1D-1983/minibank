@@ -4,7 +4,7 @@ from repositories.base import AccountRepository
 from domain.models import Account
 
 
-class InMemoryBankRepository(AccountRepository):
+class InMemoryAccountRepository(AccountRepository):
 
     def __init__(self) -> None:
         self.accounts: list[Account] = []
