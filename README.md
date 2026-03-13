@@ -7,19 +7,28 @@ A small banking-style app in Python with a layered structure: domain models, rep
 ```
 src/
 ├── domain/
-│   ├── models.py      # Account (abstract), SavingsAccount, CurrentAccount, Bank
-│   └── exceptions.py  # InsufficientFundsError, AccountNotFoundError, etc.
+│   ├── models.py      # Account (abstract), SavingsAccount, CurrentAccount, AccountAction
+│   ├── exceptions.py  # InsufficientFundsError, AccountNotFoundError, InvalidAmountError, OverdraftError
+│   └── logger.py      # AuditLogger, LogRecord
 ├── repositories/
-│   ├── base.py        # BankRepository protocol
+│   ├── base.py        # AccountRepository protocol
 │   └── in_memory.py   # InMemoryBankRepository
 ├── services/
+│   ├── bank.py        # Bank (add_account, find_account, total_deposits, get_accounts_by_owner)
 │   └── transfer_service.py  # TransferService (orchestration + locking)
 └── main.py            # Entry point
+
+tests/
+├── conftest.py           # Shared fixtures (bank, repo, transfer_service)
+├── test_domain_models.py # Account types (SavingsAccount, CurrentAccount)
+├── test_bank.py         # Bank service
+├── test_transfer_service.py  # TransferService
+└── test_audit_logger.py # AuditLogger
 ```
 
-- **Domain**: Account types and `Bank` (thin aggregate; no transfer logic).
-- **Repositories**: Load/save the `Bank` aggregate (in-memory implementation included).
-- **Services**: Transfer orchestration and lock ordering to avoid deadlock.
+- **Domain**: Account types, exceptions, and audit logging.
+- **Repositories**: `AccountRepository` protocol and in-memory implementation.
+- **Services**: `Bank` (account lookup/aggregation) and `TransferService` (transfers with lock ordering).
 
 ## Run
 
