@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 import threading
 from typing import Optional
 
@@ -8,23 +9,26 @@ from domain.exceptions import (
     OverdraftError,
 )
 
+class AccountAction(Enum):
+    DEPOSIT = "DEPOSIT"
+    WITHDRAW = "WITHDRAW"
+    INTEREST = "INTEREST"
+    TRANSFER = "TRANSFER"
+
+
 class Account(ABC):
-    owner: str
-    account_number: int
-    _balance: float
-    history: list[str]
-    _lock: threading.RLock
 
     def __init__(self, owner: str, account_number: int) -> None:
-        self.owner = owner
-        self.account_number = account_number
-        self._balance = 0
-        self.history = []
-        self._lock = threading.RLock()
+        self.owner: str = owner
+        self.account_number: int = account_number
+        self._balance: float = 0
+        self.history: list[str] = []
+        self._lock: threading.RLock = threading.RLock()
 
     @property
     def balance(self) -> float:
-        return self._balance
+        with self._lock:
+            return self._balance
 
     def deposit(self, amount: float) -> None:
         if amount <= 0:
@@ -32,7 +36,7 @@ class Account(ABC):
         
         with self._lock:
             self._balance += amount
-            self.history.append(f"DEPOSIT: +{amount:.2f}")
+            self.history.append(f"{AccountAction.DEPOSIT.value}: +{amount:.2f}")
     
     @abstractmethod
     def withdraw(self, amount: float) -> None:
@@ -56,7 +60,7 @@ class SavingsAccount(Account):
         with self._lock:
             if self._balance >= amount:
                 self._balance -= amount
-                self.history.append(f"WITHDRAW: -{amount:.2f}")
+                self.history.append(f"{AccountAction.WITHDRAW.value}: -{amount:.2f}")
             else:
                 raise InsufficientFundsError("Insufficient balance")
     
@@ -64,7 +68,7 @@ class SavingsAccount(Account):
         with self._lock:
             interest = self._balance * self.interest_rate
             self._balance += interest
-            self.history.append(f"INTEREST: +{interest:.2f}")
+            self.history.append(f"{AccountAction.INTEREST.value}: +{interest:.2f}")
 
 class CurrentAccount(Account):
     overdraft_limit: float
@@ -84,7 +88,7 @@ class CurrentAccount(Account):
         with self._lock:
             if self._balance + self.overdraft_limit >= amount:
                 self._balance -= amount
-                self.history.append(f"WITHDRAW: -{amount:.2f}")
+                self.history.append(f"{AccountAction.WITHDRAW.value}: -{amount:.2f}")
             else:
                 raise OverdraftError("Overdraft limit exceeded")
         
