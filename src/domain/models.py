@@ -92,33 +92,3 @@ class CurrentAccount(Account):
             else:
                 raise OverdraftError("Overdraft limit exceeded")
         
-class Bank:
-    accounts: list[Account]
-
-    def __init__(self) -> None:
-        self.accounts = []
-
-    def add_account(self, account: Account) -> None:
-        """
-            Adds a new account
-        """
-
-        self.accounts.append(account)
-
-    def find_account(self, account_number: int) -> Optional[Account]:
-        """
-            Gets account by account number
-        """
-
-        return next((a for a in self.accounts if a.account_number == account_number), None)
-    
-    def total_deposits(self) -> float:
-        """
-            Gets the total balance across all accounts at the bank
-        """
-
-        return sum(a.balance for a in self.accounts)
-    
-    def get_accounts_by_owner(self, owner: str) -> list[Account]:
-        """Returns all accounts owned by the given owner."""
-        return [a for a in self.accounts if a.owner == owner]

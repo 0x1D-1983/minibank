@@ -1,19 +1,37 @@
-"""In-memory implementation of BankRepository."""
+from typing import Optional
 
-from domain.models import Bank
+from repositories.base import AccountRepository
+from domain.models import Account
 
-from repositories.base import BankRepository
 
+class InMemoryBankRepository(AccountRepository):
 
-class InMemoryBankRepository(BankRepository):
-    """Holds a single Bank in memory. save() is a no-op."""
+    def __init__(self) -> None:
+        self.accounts: list[Account] = []
 
-    def __init__(self, bank: Bank | None = None) -> None:
-        self._bank = bank if bank is not None else Bank()
+    def add_account(self, account: Account) -> None:
+        """
+            Adds a new account
+        """
 
-    def get(self) -> Bank:
-        return self._bank
+        self.accounts.append(account)
 
-    def save(self, bank: Bank) -> None:
-        # In-memory: same instance, no persist step
-        pass
+    def find_by_id(self, account_number: int) -> Optional[Account]:
+        """
+            Gets account by account number
+        """
+
+        return next((a for a in self.accounts if a.account_number == account_number), None)
+
+    def find_by_owner(self, owner: str) -> list[Account]:
+        """
+            Returns all accounts owned by the given owner.
+        """
+
+        return [a for a in self.accounts if a.owner == owner]
+
+    def all(self) -> list[Account]:
+        """
+            List all accounts
+        """
+        return self.accounts
