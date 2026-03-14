@@ -7,7 +7,7 @@ from domain.exceptions import (
     OverdraftError,
 )
 from domain.models import Account, AccountAction, CurrentAccount, SavingsAccount
-from domain.logger import AuditLogger
+from services.audit_logger import AuditLogger
 
 __all__ = [
     "Account",
@@ -18,5 +18,4 @@ __all__ = [
     "OverdraftError",
     "SavingsAccount",
     "AccountAction",
-    "AuditLogger",
 ]

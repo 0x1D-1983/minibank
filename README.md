@@ -7,28 +7,31 @@ A small banking-style app in Python with a layered structure: domain models, rep
 ```
 src/
 ├── domain/
-│   ├── models.py      # Account (abstract), SavingsAccount, CurrentAccount, AccountAction
-│   ├── exceptions.py  # InsufficientFundsError, AccountNotFoundError, InvalidAmountError, OverdraftError
-│   └── logger.py      # AuditLogger, LogRecord
+│   ├── __init__.py
+│   ├── models.py       # Account (abstract), SavingsAccount, CurrentAccount, AccountAction
+│   └── exceptions.py   # InsufficientFundsError, AccountNotFoundError, InvalidAmountError, OverdraftError
 ├── repositories/
-│   ├── base.py        # AccountRepository protocol
-│   └── in_memory.py   # InMemoryAccountRepository
+│   ├── __init__.py
+│   ├── base.py         # AccountRepository protocol
+│   └── in_memory.py    # InMemoryAccountRepository
 ├── services/
-│   ├── bank.py        # Bank (add_account, find_account, total_deposits, get_accounts_by_owner)
-│   └── transfer_service.py  # TransferService (orchestration + locking)
-└── main.py            # Entry point
+│   ├── __init__.py
+│   ├── bank.py         # Bank (add_account, find_account, transfer, total_deposits, get_accounts_by_owner)
+│   └── audit_logger.py # AuditLogger, LogRecord
+├── __init__.py
+└── main.py             # Entry point
 
 tests/
-├── conftest.py           # Shared fixtures (bank, repo, transfer_service)
-├── test_domain_models.py # Account types (SavingsAccount, CurrentAccount)
-├── test_bank.py         # Bank service
-├── test_transfer_service.py  # TransferService
-└── test_audit_logger.py # AuditLogger
+├── __init__.py
+├── conftest.py         # Shared fixtures
+├── test_domain_models.py  # SavingsAccount, CurrentAccount
+├── test_bank.py        # Bank (including transfer)
+└── test_audit_logger.py  # AuditLogger
 ```
 
-- **Domain**: Account types, exceptions, and audit logging.
-- **Repositories**: `AccountRepository` protocol and in-memory implementation.
-- **Services**: `Bank` (account lookup/aggregation) and `TransferService` (transfers with lock ordering).
+- **Domain**: Account types and exceptions.
+- **Repositories**: `AccountRepository` protocol and `InMemoryAccountRepository`.
+- **Services**: `Bank` (accounts + transfer with lock ordering) and `AuditLogger`.
 
 ## Run
 

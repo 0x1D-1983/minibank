@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from domain.logger import AuditLogger, LogRecord
+from services.audit_logger import AuditLogger
 from domain.models import AccountAction
 
 

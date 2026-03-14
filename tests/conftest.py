@@ -4,7 +4,6 @@ import pytest
 
 from domain.models import CurrentAccount, SavingsAccount
 from repositories.in_memory import InMemoryAccountRepository
-from services.transfer_service import TransferService
 from services.bank import Bank
 
 
@@ -21,9 +20,3 @@ def bank() -> Bank:
 def repo(bank: Bank) -> InMemoryAccountRepository:
     """In-memory repository with the default bank."""
     return bank.accounts
-
-
-@pytest.fixture
-def transfer_service(repo: InMemoryAccountRepository) -> TransferService:
-    """Transfer service using the in-memory repo."""
-    return TransferService(repo)

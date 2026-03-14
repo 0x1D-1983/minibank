@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 import threading
-from typing import Optional
 
 from domain.exceptions import (
     InsufficientFundsError,
