@@ -1,43 +1,69 @@
 from typing import Optional
 
-from domain.models import Account
+from domain.models import Account, AccountAction
 from repositories.base import AccountRepository
 from domain.exceptions import AccountNotFoundError
+from services.audit_logger import AuditLogger
 
 
 class Bank:
-    def __init__(self, account_repo: AccountRepository) -> None:
-        self.accounts = account_repo
+    def __init__(self, account_repo: AccountRepository, logger: AuditLogger) -> None:
+        self._accounts = account_repo
+        self._logger = logger
 
     def add_account(self, account: Account) -> None:
         """
             Adds a new account
         """
 
-        self.accounts.add_account(account)
+        self._accounts.add_account(account)
 
     def find_account(self, account_number: int) -> Optional[Account]:
         """
             Gets account by account number
         """
 
-        return self.accounts.find_by_id(account_number)
+        return self._accounts.find_by_id(account_number)
     
     def total_deposits(self) -> float:
         """
             Gets the total balance across all accounts at the bank
         """
 
-        return sum(a.balance for a in self.accounts.all())
+        return sum(a.balance for a in self._accounts.all())
     
     def get_accounts_by_owner(self, owner: str) -> list[Account]:
         """
             Returns all accounts owned by the given owner.
         """
         
-        return self.accounts.find_by_owner(owner)
+        return self._accounts.find_by_owner(owner)
+    
+    async def deposit(self, account_number: int, amount: float) -> None:
+        """
+            Deposit amount
+        """
 
-    def transfer(
+        account = self.find_account(account_number)
+        if account is None:
+            raise AccountNotFoundError("Account doesn't exist")
+        
+        account.deposit(amount)
+        await self._logger.log(account_number, AccountAction.DEPOSIT, amount)
+
+    async def withdraw(self, account_number: int, amount: float) -> None:
+        """
+            Withdraw amount
+        """
+
+        account = self.find_account(account_number);
+        if account is None:
+            raise AccountNotFoundError("Account doesn't exist")
+        
+        account.withdraw(amount)
+        await self._logger.log(account_number, AccountAction.WITHDRAW, amount)
+
+    async def transfer(
         self,
         from_account_number: int,
         to_account_number: int,
@@ -66,3 +92,5 @@ class Bank:
             with second._lock:
                 from_account.withdraw(amount)
                 to_account.deposit(amount)
+        await self._logger.log(from_account_number, AccountAction.TRANSFER, -amount)
+        await self._logger.log(to_account_number, AccountAction.TRANSFER, amount)
