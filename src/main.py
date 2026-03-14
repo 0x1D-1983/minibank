@@ -3,14 +3,14 @@
 import asyncio
 
 from domain.models import CurrentAccount, SavingsAccount
-from repositories.in_memory import InMemoryAccountRepository
+from repositories.postgres import PostgresAccountRepository
 from services.bank import Bank
 from services.audit_logger import AuditLogger
 
 
 async def main() -> None:
 
-    repo = InMemoryAccountRepository()
+    repo = PostgresAccountRepository("postgresql://admin:***REMOVED***@localhost:5432/minibank")
     bank = Bank(repo, AuditLogger())
     await bank.add_account(SavingsAccount("Alice", 1, interest_rate=0.02))
     await bank.add_account(CurrentAccount("Bob", 2, overdraft_limit=100))
