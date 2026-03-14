@@ -11,44 +11,29 @@ class Bank:
         self._accounts = account_repo
         self._logger = logger
 
-    def add_account(self, account: Account) -> None:
-        """
-            Adds a new account
-        """
+    async def add_account(self, account: Account) -> None:
+        await self._accounts.add_account(account)
 
-        self._accounts.add_account(account)
+    async def find_account(self, account_number: int) -> Optional[Account]:
+        return await self._accounts.find_by_id(account_number)
 
-    def find_account(self, account_number: int) -> Optional[Account]:
-        """
-            Gets account by account number
-        """
+    async def total_deposits(self) -> float:
+        accounts = await self._accounts.all()
+        return sum(a.balance for a in accounts)
 
-        return self._accounts.find_by_id(account_number)
-    
-    def total_deposits(self) -> float:
-        """
-            Gets the total balance across all accounts at the bank
-        """
-
-        return sum(a.balance for a in self._accounts.all())
-    
-    def get_accounts_by_owner(self, owner: str) -> list[Account]:
-        """
-            Returns all accounts owned by the given owner.
-        """
-        
-        return self._accounts.find_by_owner(owner)
+    async def get_accounts_by_owner(self, owner: str) -> list[Account]:
+        return await self._accounts.find_by_owner(owner)
     
     async def deposit(self, account_number: int, amount: float) -> None:
         """
             Deposit amount
         """
 
-        account = self.find_account(account_number)
+        account = await self.find_account(account_number)
         if account is None:
             raise AccountNotFoundError("Account doesn't exist")
-        
         account.deposit(amount)
+        await self._accounts.update_account(account)
         await self._logger.log(account_number, AccountAction.DEPOSIT, amount)
 
     async def withdraw(self, account_number: int, amount: float) -> None:
@@ -56,11 +41,11 @@ class Bank:
             Withdraw amount
         """
 
-        account = self.find_account(account_number);
+        account = await self.find_account(account_number)
         if account is None:
             raise AccountNotFoundError("Account doesn't exist")
-        
         account.withdraw(amount)
+        await self._accounts.update_account(account)
         await self._logger.log(account_number, AccountAction.WITHDRAW, amount)
 
     async def transfer(
@@ -74,11 +59,10 @@ class Bank:
         Locks accounts in a consistent order to prevent deadlock.
         """
 
-        from_account = self.find_account(from_account_number)
+        from_account = await self.find_account(from_account_number)
         if from_account is None:
             raise AccountNotFoundError("Source account doesn't exist")
-
-        to_account = self.find_account(to_account_number)
+        to_account = await self.find_account(to_account_number)
         if to_account is None:
             raise AccountNotFoundError("Destination account doesn't exist")
 
@@ -92,5 +76,7 @@ class Bank:
             with second._lock:
                 from_account.withdraw(amount)
                 to_account.deposit(amount)
+        await self._accounts.update_account(from_account)
+        await self._accounts.update_account(to_account)
         await self._logger.log(from_account_number, AccountAction.TRANSFER, -amount)
         await self._logger.log(to_account_number, AccountAction.TRANSFER, amount)

@@ -1,37 +1,24 @@
 from typing import Optional
 
-from repositories.base import AccountRepository
 from domain.models import Account
+from repositories.base import AccountRepository
 
 
 class InMemoryAccountRepository(AccountRepository):
-
     def __init__(self) -> None:
         self.accounts: list[Account] = []
 
-    def add_account(self, account: Account) -> None:
-        """
-            Adds a new account
-        """
-
+    async def add_account(self, account: Account) -> None:
         self.accounts.append(account)
 
-    def find_by_id(self, account_number: int) -> Optional[Account]:
-        """
-            Gets account by account number
-        """
-
+    async def find_by_id(self, account_number: int) -> Optional[Account]:
         return next((a for a in self.accounts if a.account_number == account_number), None)
 
-    def find_by_owner(self, owner: str) -> list[Account]:
-        """
-            Returns all accounts owned by the given owner.
-        """
-
+    async def find_by_owner(self, owner: str) -> list[Account]:
         return [a for a in self.accounts if a.owner == owner]
 
-    def all(self) -> list[Account]:
-        """
-            List all accounts
-        """
+    async def all(self) -> list[Account]:
         return self.accounts
+
+    async def update_account(self, account: Account) -> None:
+        pass  # in-memory account is already the live object
