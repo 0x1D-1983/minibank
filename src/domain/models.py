@@ -37,6 +37,9 @@ class Account(ABC):
             self._balance += amount
             self.history.append(f"{AccountAction.DEPOSIT.value}: +{amount:.2f}")
     
+    def __str__(self) -> str:
+        return f"Account(owner={self.owner!r}, account_number={self.account_number}, balance={self.balance})"
+
     @abstractmethod
     def withdraw(self, amount: float) -> None:
         ...
@@ -63,6 +66,9 @@ class SavingsAccount(Account):
             else:
                 raise InsufficientFundsError("Insufficient balance")
     
+    def __str__(self) -> str:
+        return f"SavingsAccount(owner={self.owner!r}, account_number={self.account_number}, balance={self.balance}, interest_rate={self.interest_rate})"
+
     def apply_interest(self) -> None:
         with self._lock:
             interest = self._balance * self.interest_rate
@@ -76,6 +82,9 @@ class CurrentAccount(Account):
         super().__init__(owner, account_number)
         self.overdraft_limit = overdraft_limit
     
+    def __str__(self) -> str:
+        return f"CurrentAccount(owner={self.owner!r}, account_number={self.account_number}, balance={self.balance}, overdraft_limit={self.overdraft_limit})"
+
     def withdraw(self, amount: float) -> None:
         """
             Withdraws amount with overdraft
